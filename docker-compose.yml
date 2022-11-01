@@ -13,8 +13,6 @@ services:
   
   db:
     image: postgres:15.0
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=123456
       - POSTGRES_USER=postgres
