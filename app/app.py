@@ -4,6 +4,12 @@ import psycopg2
 
 app = Flask(__name__)
 
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+
 def fill_db(connection, cursor):
     cursor.execute("""
         drop table if exists cacti_table;
@@ -30,7 +36,7 @@ def read_db(cursor):
 @app.route('/')
 def home():
     try:
-        conn = psycopg2.connect(dbname='cacti', user='postgres', host='db', port=5432, password='123456')
+        conn = psycopg2.connect(dbname=POSTGRES_DB, user=POSTGRES_USER, host=POSTGRES_HOST, port=POSTGRES_PORT, password=POSTGRES_PASSWORD)
     except:
         return "Unable to connect to the database"
     cur = conn.cursor()

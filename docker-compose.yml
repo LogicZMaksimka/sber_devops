@@ -4,6 +4,12 @@ services:
     image: logiczmaksimka/sber_devops:my_simple_web
     volumes:
       - ./app:/app
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=cacti
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=db
     ports:
       - 5000:5000
     depends_on:
