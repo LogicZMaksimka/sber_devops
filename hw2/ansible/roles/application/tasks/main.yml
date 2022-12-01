@@ -1,0 +1,81 @@
+- name: Install Docker Module for Python
+  pip:
+    name:
+      - "docker"
+  become: yes
+
+- name: Create docker network
+  docker_network:
+    name: app_network
+
+- name: Pull images
+  docker_image:
+    name: "{{item}}"
+    source: pull
+  with_items:
+  - logiczmaksimka/sber_devops:my_simple_web
+  - postgres
+
+- name: Make git dir
+  file:
+    path: "/tmp/ansible-project/repo"
+    state: directory
+    mode: 0777
+    recurse: yes
+
+- name: Git clone repo
+  git:
+    repo: https://github.com/LogicZMaksimka/sber_devops.git
+    dest: /tmp/ansible-project/repo
+    version: main
+    clone: yes
+    update: yes
+    force: yes
+
+- name: Create db container
+  docker_container:
+    image: postgres
+    name: db
+    state: started
+    ports: "5433:5432"
+    env:
+      POSTGRES_HOST: "localhost"
+      POSTGRES_USER: "{{POSTGRES_USER}}"
+      POSTGRES_PASSWORD: "{{POSTGRES_PASSWORD}}"
+      POSTGRES_DB: "{{POSTGRES_DB}}"
+      POSTGRES_PORT: "5432"
+    networks:
+      - name: app_network
+    volumes:
+      - /tmp/ansible-project/data:/var/lib/postgresql/data
+
+- name: Create adminer for db
+  docker_container:
+    image: adminer
+    name: adminer
+    state: started
+    ports: "8080:8080"
+    networks:
+      - name: app_network
+
+- name: Create web container
+  docker_container:
+    image: logiczmaksimka/sber_devops:my_simple_web
+    name: web
+    ports: "5000:5000"
+    state: started
+    env:
+      FLASK_DEBUG: "True"
+      POSTGRES_USER: "{{POSTGRES_USER}}"
+      POSTGRES_PASSWORD: "{{POSTGRES_PASSWORD}}"
+      POSTGRES_DB: "{{POSTGRES_DB}}"
+      POSTGRES_PORT: "{{POSTGRES_PORT}}"
+      POSTGRES_HOST: "{{POSTGRES_HOST}}"
+    networks:
+      - name: app_network
+    volumes: 
+      - /tmp/ansible-project/repo/sber_devops/app:/ansible
+    command: "{{item}}"
+  with_items:
+    - pip install -r /ansible/requirements.txt
+    - python /ansible/app.py
