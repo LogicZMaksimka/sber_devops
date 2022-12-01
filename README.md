@@ -4,7 +4,7 @@
 docker-compose up
 ```
 
-Принцип работы
+### Принцип работы
 1) docker-compose запускает собирает alpine контейнер и устанавливает туда всё необходимое для работы ansible, после чего запускает команду ansible-playbook start.yml 
 2) ansible-playbook запускает роль application, внутри которой происходят следующие действия:
     * Скачивание докера на localhost
