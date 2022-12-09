@@ -1,9 +1,7 @@
 version: "3.1"
 services:
   web:
-    image: logiczmaksimka/sber_devops:my_simple_web
-    volumes:
-      - ./app:/app
+    build: ./app
     environment:
       - POSTGRES_PASSWORD=123456
       - POSTGRES_USER=postgres
@@ -11,9 +9,9 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_HOST=db
     ports:
-      - 5000:5000
+      - 5005:5000
     depends_on:
-      - db
+       - db
     links:
      - db
   
@@ -29,4 +27,3 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: always
